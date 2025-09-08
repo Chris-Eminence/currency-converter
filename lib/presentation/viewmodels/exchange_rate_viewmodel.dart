@@ -1,64 +1,11 @@
-// exchange_rate_notifier.dart
+import 'package:currency_converter/presentation/viewmodels/data_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../core/utils/animation_utils.dart';
 import '../../core/utils/exchange_rate_state.dart';
 import '../../data/data_source/currency_api.dart';
-import '../../data/model/conversion_model.dart';
 
-// providers.dart
-final exchangeRateNotifierProvider =
-    StateNotifierProvider<ExchangeRateNotifier, ExchangeRateState>((ref) {
-      return ExchangeRateNotifier();
-    });
 
-// Provider for the exchange rate data
-final exchangeRateProvider = Provider<ExchangeRate?>((ref) {
-  return ref.watch(exchangeRateNotifierProvider).exchangeRate;
-});
-
-// Provider for the swap animation value
-final swapAnimationProvider = StateProvider<double>((ref) => 0.0);
-
-// Provider for available currencies
-final availableCurrenciesProvider = Provider<List<String>>((ref) {
-  final exchangeRate = ref.watch(exchangeRateProvider);
-  return exchangeRate?.currencies ?? [];
-});
-
-// Provider for loading state
-final isLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(exchangeRateNotifierProvider).isLoading;
-});
-
-// Provider for error state
-final errorProvider = Provider<String?>((ref) {
-  return ref.watch(exchangeRateNotifierProvider).error;
-});
-
-// Provider for from currency
-final fromCurrencyProvider = Provider<String>((ref) {
-  return ref.watch(exchangeRateNotifierProvider).fromCurrency;
-});
-
-// Provider for to currency
-final toCurrencyProvider = Provider<String>((ref) {
-  return ref.watch(exchangeRateNotifierProvider).toCurrency;
-});
-
-// Provider for converted amount
-final convertedAmountProvider = Provider<double>((ref) {
-  return ref.watch(exchangeRateNotifierProvider).convertedAmount;
-});
-
-// Provider for current rate display
-final currentRateProvider = Provider<double>((ref) {
-  final state = ref.watch(exchangeRateNotifierProvider);
-  return state.exchangeRate?.conversionRates[state.toCurrency] ?? 0.0;
-});
-
-class ExchangeRateNotifier extends StateNotifier<ExchangeRateState> {
-  ExchangeRateNotifier() : super(ExchangeRateState());
+class ExchangeRateViewmodel extends StateNotifier<ExchangeRateState> {
+  ExchangeRateViewmodel() : super(ExchangeRateState());
 
   // Fetch exchange rates
   Future<void> fetchExchangeRates([String? baseCurrency]) async {
@@ -129,33 +76,6 @@ class ExchangeRateNotifier extends StateNotifier<ExchangeRateState> {
     return state.exchangeRate?.conversionRates[state.toCurrency] ?? 0.0;
   }
 
-  // Enhanced swap method
-  // Future<void> swapCurrenciesWithAnimation(WidgetRef ref) async {
-  //   if (state.fromCurrency == state.toCurrency) return;
-  //
-  //   // Simple animation without complex utils
-  //   final animationController = ref.read(swapAnimationProvider.notifier);
-  //
-  //   // Animate from 0 to 1 over 300ms
-  //   const duration = Duration(milliseconds: 300);
-  //   const interval = Duration(milliseconds: 16);
-  //   final steps = duration.inMilliseconds ~/ interval.inMilliseconds;
-  //
-  //   for (int i = 0; i <= steps; i++) {
-  //     await Future.delayed(interval);
-  //     animationController.state = i / steps;
-  //   }
-  //
-  //   // PERFORM SWAP AFTER ANIMATION COMPLETES
-  //   _performSwap();
-  //
-  //   // Fetch new rates for the NEW base currency
-  //   await fetchExchangeRates(state.fromCurrency);
-  //
-  //   // Reset animation
-  //   animationController.state = 0.0;
-  // }
-
   Future<void> swapCurrenciesWithAnimation(WidgetRef ref) async {
     if (state.fromCurrency == state.toCurrency) return;
 
@@ -207,8 +127,7 @@ class ExchangeRateNotifier extends StateNotifier<ExchangeRateState> {
       toCurrency: newToCurrency,
     );
 
-    // Now set the amount to the previously converted value
-    // and let the normal conversion logic handle the recalculation
+    // Set the amount to the previously converted value and let the normal conversion logic handle the recalculation
     if (previousConvertedAmount > 0) {
       state = state.copyWith(amount: previousConvertedAmount);
       // The _convertAmount() will be called automatically after state update
@@ -218,7 +137,7 @@ class ExchangeRateNotifier extends StateNotifier<ExchangeRateState> {
     state = state.copyWith(convertedAmount: 0.0);
   }
 
-  // Also update your regular swapCurrencies method to use the same logic:
+  // Update regular swapCurrencies method to use same logic:
   void swapCurrencies() {
     if (state.fromCurrency == state.toCurrency) return;
 
@@ -234,7 +153,7 @@ class ExchangeRateNotifier extends StateNotifier<ExchangeRateState> {
       toCurrency: newToCurrency,
     );
 
-    // Now set the amount to the previously converted value
+    // Set the amount to the previously converted value
     if (previousConvertedAmount > 0) {
       state = state.copyWith(amount: previousConvertedAmount);
     }

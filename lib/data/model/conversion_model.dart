@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
-// Your existing ExchangeRate model with slight modification
+// ExchangeRate model
 class ExchangeRate {
   final String baseCode;
   final List<String> currencies;

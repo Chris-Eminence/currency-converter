@@ -3,12 +3,13 @@ import 'package:currency_code_to_currency_symbol/currency_code_to_currency_symbo
 import 'package:currency_converter/core/constants/colors.dart';
 import 'package:currency_converter/core/constants/dimensions.dart';
 import 'package:currency_converter/core/utils/exchange_rate_state.dart';
+import 'package:currency_converter/presentation/viewmodels/data_provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../viewmodels/exchange_rate_repo_provider.dart';
+import '../viewmodels/exchange_rate_viewmodel.dart';
 import '../widgets/amount_text_field.dart';
 import '../widgets/currency_dropdown_button.dart';
 import '../widgets/currency_symbol_widget.dart';
@@ -23,10 +24,13 @@ class CurrencyConverterPage extends ConsumerStatefulWidget {
 }
 
 class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
+
+  // Controllers for text fields
   final TextEditingController amountController = TextEditingController();
   final TextEditingController convertedAmountController =
       TextEditingController();
 
+  // Initialize state and fetch initial data
   @override
   void initState() {
     super.initState();
@@ -35,7 +39,7 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
       ref.read(exchangeRateNotifierProvider.notifier).fetchExchangeRates();
     });
   }
-
+  // Dispose controllers to free resources
   @override
   void dispose() {
     amountController.dispose();
@@ -49,6 +53,7 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     final availableCurrencies = ref.watch(availableCurrenciesProvider);
 
     // Sync controllers with state
+    // Clear amount field if amount is 0
     if (state.amount == 0.0 && amountController.text.isNotEmpty) {
       amountController.clear();
     }
@@ -106,6 +111,7 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                   const LabelTextWidget(text: 'Amount'),
                   Row(
                     children: [
+                      // Display currency symbol
                       CurrencySymbolWidget(currencyCode: state.fromCurrency ),
                       const SizedBox(width: 13),
                       Expanded(
@@ -140,6 +146,7 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                   Row(
                     children: [
                       Expanded(child: Divider(color: kDividerColor)),
+                      // Swap button with animation
                       Consumer(
                         builder: (context, ref, child) {
                           final animationValue = ref.watch(
@@ -166,6 +173,7 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                   const LabelTextWidget(text: 'Converted Amount'),
                   Row(
                     children: [
+                      // Display currency symbol
                       CurrencySymbolWidget(currencyCode: state.toCurrency ),
                       const SizedBox(width: 13),
                       Expanded(
@@ -200,6 +208,8 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
             const SizedBox(height: 30),
             const LabelTextWidget(text: 'Indicative Exchange Rate'),
             const SizedBox(height: 8),
+
+             // Show loading indicator or exchange rate
              state.isLoading ? Row(
                children: [
                  Text('Loading rate...', style: GoogleFonts.roboto(
@@ -227,6 +237,8 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                 color: Colors.black,
               ),
             ),
+
+            // Display error message if any
 
             if (state.error != null)
               Padding(
